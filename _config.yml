@@ -16,7 +16,7 @@ url:              http://tpagram.github.io
 google_analytics: UA-100035749-1
 author:
   name:           'Thomas Pagram'
-  url:            https://twitter.com/mdo
+  url:            http://tpagram.github.io
 
 
 # Custom vars
@@ -25,6 +25,17 @@ version:          2.0.0
 github:           https://github.com/tpagram
 linkedin:         https://www.linkedin.com/in/tpagram/
 
-gems: [jekyll-paginate]
+social:
+  name: Thomas Pagram
+  links:
+    - https://github.com/tpagram
+    - https://www.linkedin.com/in/tpagram/
+
+logo: /assets/me_circle.png
+
 paginate: 5
 paginate_path: "page:num"
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-paginate
