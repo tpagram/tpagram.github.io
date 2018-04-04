@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Home
+title: Blog
 ---
 
 <div class="posts">
@@ -13,8 +13,10 @@ title: Home
     </h1>
 
     <span class="post-date">{{ post.date | date_to_string }}</span>
-
-    {{ post.content }}
+    {{ post.excerpt }}
+    <a href="{{ post.url }}">
+      Read
+    </a>
   </div>
   {% endfor %}
 </div>

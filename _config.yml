@@ -1,6 +1,6 @@
 # Dependencies
 markdown:         kramdown
-highlihts:	      pygments
+highlights:	      pygments
 
 # Permalinks
 permalink:        pretty
@@ -39,3 +39,5 @@ paginate_path: "page:num"
 plugins:
   - jekyll-seo-tag
   - jekyll-paginate
+
+permalink: /posts/:categories/:title

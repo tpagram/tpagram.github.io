@@ -1,0 +1,19 @@
+.headshot {
+  border-radius: 50%;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sidebar-socials {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.sidebar a:hover {
+  color: #268bd2;
+}
+
+.sidebar-copyright p {
+  margin-bottom: 0;
+}

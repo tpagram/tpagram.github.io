@@ -2,6 +2,9 @@
 layout: post
 title: Setting up a Jupyter notebook server on an EC2 instance using Docker
 description: A guide to having your own Jupyter notebook server running in a Docker container on a free EC2 instance!
+category: Technology
+excerpt_separator: <!--more-->
+comments: true
 ---
 
 Because I'm a fair hand at maths and even better at being late to parties, I've been meaning lately to play around with some data science. However, I ran into a few dilemmas setting myself up:
@@ -11,6 +14,7 @@ Because I'm a fair hand at maths and even better at being late to parties, I've 
 * I don't want to mess around setting up the environment a second time.
 
 To solve these problems, after discussing it with a good friend of mine and finding out he had a similar setup himself, I decided to host a Jupyter notebook on a free tier EC2 instance. Thereby being able to access it from anywhere!
+<!--more-->
 
 To add to it, I would also set up the Python environment in a Docker container. That way, if I ever wanted to move it to another server or run it locally, it would be an absolute cinch.
 

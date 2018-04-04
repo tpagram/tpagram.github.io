@@ -1,14 +1,14 @@
 <div class="sidebar">
   <div class="container sidebar-sticky">
     <div class="sidebar-about">
-      <img src="/assets/me_circle.png" alt="Thomas Pagram headshot. Smiling software engineer."></img>
+      <img class="headshot" src="/assets/christmas.png" alt="Thomas Pagram headshot. Software engineer."></img>
       <h1>{{ site.title }}</h1>
       <p class="lead">{{ site.description }}</p>
     </div>
 
     <ul class="sidebar-nav">
-      <li class="sidebar-nav-item{% if page.title == "Home" %} active{% endif %}">
-        <a href="/">Home</a>
+      <li class="sidebar-nav-item{% if page.title == "Blog" %} active{% endif %}">
+        <a href="/">Blog</a>
       </li>
 
       {% comment %}
@@ -26,11 +26,15 @@
           {% endif %}
         {% endif %}
       {% endfor %}
-
-      <li class="sidebar-nav-item"><a href="{{ site.github }}">Github</a></li>
-      <li class="sidebar-nav-item"><a href="{{ site.linkedin }}">Linkedin</a></li>
     </ul>
 
-    <p>&copy; {{ site.time | date: '%Y' }}. All rights reserved.</p>
+    <div class="sidebar-socials">
+      <a href={{ site.github }} title="Github"><i class="fab fa-github fa-lg"></i></a>
+      <a href={{ site.linkedin }} title="LinkedIn"><i class="fab fa-linkedin fa-lg"></i></a>
+    </div>
+
+    <div class="sidebar-copyright">
+      <p>&copy; All rights reserved.</p>
+    </div>
   </div>
 </div>

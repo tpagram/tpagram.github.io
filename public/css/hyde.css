@@ -84,13 +84,6 @@ html {
   font-size: 3.25rem;
 }
 
-/* About section */
-.sidebar-about img {
-  width: 80%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 /* Sidebar nav */
 .sidebar-nav {
   padding-left: 0;
