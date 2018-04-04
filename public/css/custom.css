@@ -6,6 +6,7 @@
 }
 
 .sidebar-socials {
+  height: 26px;
   margin-top: 0;
   margin-bottom: 1rem;
 }
@@ -16,4 +17,5 @@
 
 .sidebar-copyright p {
   margin-bottom: 0;
+  font-size: 14px;
 }
