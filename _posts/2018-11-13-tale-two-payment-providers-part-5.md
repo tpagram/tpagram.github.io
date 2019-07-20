@@ -2,19 +2,19 @@
 layout: post
 title: To Our Credit
 subtitle: How we earned our Stripes — Part 5
-description: This is the fifth article in a series of blog posts about the transition towards Stripe as Airtasker’s main payment provider.
-category: Technology
+description: Fifth article in a series of blog posts about the migrating to Stripe.
+category: tech
 excerpt_separator: <!--more-->
 comments: true
 ---
 
-![](https://cdn-images-1.medium.com/max/6002/1*PreUrIMpeE_v2dRm-qSYBA.png){:width="100%"}
+![](/assets/two-payment-providers-header-5.png){:width="100%"}
 
 [*Originally posted on Medium.*](https://medium.com/@tpagram/to-our-credit-1cea3c41dfbb)
 
 *This is the fifth article in a series of blog posts about our transition towards Stripe as Airtasker’s main payment provider.*
 
-In [Part 3](https://medium.com/@tpagram/stripe-down-under-9fe3ca7aa8ee), we made a decision. We unleashed Stripe onto our system before our poster’s credit cards were migrated, creating two concurrent streams of payment. I shouldn’t say it was a damn fine call, since the impact was more due to serendipity than insight, but damn was it a fine call.
+In [Part 3]({% post_url 2018-11-13-tale-two-payment-providers-part-3 %}), we made a decision. We unleashed Stripe onto our system before our poster’s credit cards were migrated, creating two concurrent streams of payment. I shouldn’t say it was a damn fine call, since the impact was more due to serendipity than insight, but damn was it a fine call.
 <!--more-->
 
 Why? Well, while we intended the token migration to be a fast follow, it took close to three months to see through to the end. There’s no way we could have waited that long to switch to Stripe.
@@ -23,13 +23,14 @@ What was the cause of this hold-up? Was it due to unforeseen implementation prob
 
 Emails. It took three months because of emails. Let me spin you a yarn about the pleasures of organising a migration between four separate companies.
 
+<br />
 ## Simple enough, isn’t it?
 
 Stripe, bless their hearts, have an optimistic view about migrating credit cards. Their documentation essentially says the following: politely ask your old payment provider to migrate their data. Then, behind the scenes, without you worrying your pretty head about it, all of the super secure payment data will be migrated over to Stripe. Afterwards, Stripe will provide you with a terrifyingly large, Atom-crashing JSON file, which will map your old payment methods to the new Stripe ones.
 
 We got stuck on the first step. But let’s start from the beginning.
 
-In the Airtasker platform, when a user enters a credit card, all of the private, sensitive information is sent off to our payment provider to store. In return, they give us some harmless form of identifying that credit card: a token. For each credit card, we store a record of that token and some other bits and pieces of info. So instead of storing that Hugh Jass has a credit card number of 4111 1111 1111 1111 and an expiry of 11/23, we store some gibberish like 3f2@314dfH8sad-234and the last four digits 1111.
+In the Airtasker platform, when a user enters a credit card, all of the private, sensitive information is sent off to our payment provider to store. In return, they give us some harmless form of identifying that credit card: a token. For each credit card, we store a record of that token and some other bits and pieces of info. So instead of storing that `Hugh Jass` has a credit card number of `4111 1111 1111 1111` and an expiry of `11/23`, we store some gibberish like `3f2@314dfH8sad-234` and the last four digits `1111`.
 
 What that means is our database had half-a-million tokens corresponding to credit card information stored in our old provider. Each time we wanted to use the credit card, we sent off the token and our old provider would use the secure credit card info.
 
@@ -37,11 +38,12 @@ Yet if we wanted to process our payments through Stripe, those tokens now became
 
 This is what Stripe were suggesting. Get your old provider to send us two important things: the sensitive credit card information and some identifier that Airtasker recognises. That way we can create our own secure records for each card and then provide a file that maps the old token to the new one. All Airtasker have to do is run through their payment records and create a new record with the new token for each. Simple. Right?
 
+<br />
 ## It’s never simple
 
 After some discussion, it turned out there was an extra step we were missing. Our old provider dealt with **performing** the payments. When it came to **storing** credit cards, it used an external service that specialises in handling secure payment information.
 
-![The circle of life.](https://cdn-images-1.medium.com/max/6000/1*XmEOhI0dw-XI40il3S0Fuw.png)*The circle of life.*
+![The circle of life.](/assets/circle-of-life.png){:width="100%"}*The circle of life.*
 
 Ah, a new challenger. Let’s recap what had to go down now. Airtasker had to provide our old provider with a list of tokens for the credit cards that needed to be migrated. Our old provider needed to turn that list of tokens into their **own** tokens provided by their token-storing service, and then ask them to pass the corresponding credit card info to Stripe. Stripe would receive that info and create internal records with new tokens, which they would pass to us. And then we would map our old tokens to the new ones.
 
@@ -51,29 +53,32 @@ So not only did we need to coordinate this migration effort between four compani
 
 How did we achieve this? Communication. It was a menagerie of personalities and interests. We had Stripe the excitable puppy, our old provider the apathetic cat, the token securer the confused hamster, and Airtasker: crying in the corner.
 
-![A few days of email communication.](https://cdn-images-1.medium.com/max/6000/1*eZo6Wjiv-mdLQysX3EnnYg.png)*A few days of email communication.*
+![A few days of email communication.](/assets/email-communication.png){:width="100%"}*A few days of email communication.*
 
 As an illustration, above is a snapshot of a few days of emails between the four of us. I was going to include the full set, but was advised to exclude it on the basis of ‘well, that just makes us all look incompetent.’
 
+<br />
 ## A new day
 
 Eventually, one fateful morning, we walked into the office, cracked open up our email clients with our faded, broken keyboards, and found a JSON file waiting for us from Stripe. Hallelujah!
 
-    "999999": {
-        "id": "cus_abcde",
-        "cards": {
-          "123456789": {
-            "id": "card_123456",
-            "fingerprint": "1234",
-            "last4": "1111",
-            "brand": "Visa"
-          },
-        }
-      }
+```
+"999999": {
+    "id": "cus_abcde",
+    "cards": {
+      "123456789": {
+        "id": "card_123456",
+        "fingerprint": "1234",
+        "last4": "1111",
+        "brand": "Visa"
+      },
+    }
+  }
+```
 
-Above is an anonymised example of the contents of that JSON file. Here, a poster with an identifying record of 999999 is now a Stripe customer that we can access with a customer id of cus_abcde. Their single active card, which was some meaningless token from the secure token provider, has a new unique id card_123456 and a bunch of non-sensitive info we can use for sanity checks.
+Above is an anonymised example of the contents of that JSON file. Here, a poster with an identifying record of `999999` is now a Stripe customer that we can access with a customer id of `cus_abcde`. Their single active card, which was some meaningless token from the secure token provider, has a new unique id `card_123456` and a bunch of non-sensitive info we can use for sanity checks.
 
-Now came the part actually involving engineering: another terrifying migration script to run on production. Luckily at this point, having already written a [terrifying migration rake task for bank accounts](https://medium.com/@tpagram/putting-our-accounts-in-order-3366d17ce549), we were pros.
+Now came the part actually involving engineering: another terrifying migration script to run on production. Luckily at this point, having already written a [terrifying migration rake task for bank accounts]({% post_url 2018-11-13-tale-two-payment-providers-part-4 %}), we were pros.
 
 Log the task to death. Make it reversible. Give fine grain control over the who and how many users the task runs on. Test locally, then on staging. Test on 1 users, then 10, then 100, 1000, the full batch. Sacrifice an intern to grant the favour of the gods.
 
@@ -81,6 +86,7 @@ In the end the task was a lot more straightforward than the bank account equival
 
 One morning, most of our users were creating tasks in our old provider. A few hours and half-a-million tokens later, everyone was creating tasks in Stripe.
 
+<br />
 ## The Promised Land
 
 We were on Stripe. After close to a year of effort, every single new task on the platform was a Stripe task. The number of tasks on our old provider was dwindling as taskers completed their active tasks. In a few months time, we could purge the old payments code from our codebase. Paradise.
@@ -93,13 +99,13 @@ Looking back, there was indeed a lot to celebrate. The highest compliment I give
 
 If you’ve made it through this saga of articles, well done. It’s been a lengthy read. Let’s recap.
 
-In [Part 1](https://medium.com/@tpagram/a-tale-of-two-payment-providers-8788e4401b0c), we set the scene: a small team of engineers determined to guide Airtasker through the murky depths of our old provider and into the green pastures of Stripe.
+In [Part 1]({% post_url 2018-11-13-tale-two-payment-providers-part-1 %}), we set the scene: a small team of engineers determined to guide Airtasker through the murky depths of our old provider and into the green pastures of Stripe.
 
-In [Part 2](https://medium.com/@tpagram/stripe-in-the-uk-dec797a7585b), we used our launch of Airtasker in the UK to test an MVP of Stripe on a small number of users.
+In [Part 2]({% post_url 2018-11-13-tale-two-payment-providers-part-2 %}), we used our launch of Airtasker in the UK to test an MVP of Stripe on a small number of users.
 
-In [Part 3](https://medium.com/@tpagram/stripe-down-under-9fe3ca7aa8ee), we took our successful MVP across to the main Australian platform and formed our plan for the migration.
+In [Part 3]({% post_url 2018-11-13-tale-two-payment-providers-part-3 %}), we took our successful MVP across to the main Australian platform and formed our plan for the migration.
 
-In [Part 4](https://medium.com/@tpagram/putting-our-accounts-in-order-3366d17ce549), we migrated across all of our tasker’s bank accounts and switched on Stripe in Australia.
+In [Part 4]({% post_url 2018-11-13-tale-two-payment-providers-part-4 %}), we migrated across all of our tasker’s bank accounts and switched on Stripe in Australia.
 
 And finally, in Part 5, we migrated our credit cards — completing the migration.
 

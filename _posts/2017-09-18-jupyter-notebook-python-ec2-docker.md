@@ -2,7 +2,7 @@
 layout: post
 title: Setting up a Jupyter notebook server on an EC2 instance using Docker
 description: A guide to having your own Jupyter notebook server running in a Docker container on a free EC2 instance!
-category: Technology
+category: tech
 excerpt_separator: <!--more-->
 comments: true
 ---

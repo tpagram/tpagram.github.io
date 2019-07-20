@@ -2,13 +2,13 @@
 layout: post
 title: Stripe in the UK
 subtitle: How we earned our Stripes — Part 2
-description: This is the second article in a series of blog posts about the transition towards Stripe as Airtasker’s main payment provider.
-category: Technology
+description: Second article in a series of blog posts about the migrating to Stripe.
+category: tech
 excerpt_separator: <!--more-->
 comments: true
 ---
 
-![](https://cdn-images-1.medium.com/max/6002/1*Ot9Gb-fcfM4_JFhgIPcY5A.png){:width="100%"}
+![](/assets/two-payment-providers-header-2.png){:width="100%"}
 
 [*Originally posted on Medium.*](https://medium.com/@tpagram/stripe-in-the-uk-dec797a7585b)
 
@@ -58,6 +58,7 @@ We identified four main tasks to accomplish before launch:
 
 We needed to prune, plan, develop and analyse. We’ll go through each in detail.
 
+<br />
 ## **Pruning our codebase**
 
 According to [CLOC](https://github.com/AlDanial/cloc), the Airtasker API alone has over 800,000 lines of code. Our existing payments engine was tightly coupled to this codebase like vines wrapped around the trunk of a tree. After years of growth, it was difficult to see what was providing more structure — the trunk or the vines.
@@ -72,12 +73,13 @@ The database structure for our payments tables were too coupled to our old provi
 
 This spread the impact of the payments engine on our codebase further — a hypothetical past developer may have the wisdom to abstract around a payments API call, but not for simply checking a field on a payment record in the database. And now those records were bunk.
 
-There was no getting around it. We had to sit down, go through the codebase, and pick points to sever the code. To do this, we wrote a simple module called a PaymentProviderSwitcher. It took a user, and returned whether they should use the old payments engine or the new. The majority of the time it was as simple as whether the user was in Australia or the UK.
+There was no getting around it. We had to sit down, go through the codebase, and pick points to sever the code. To do this, we wrote a simple module called a `PaymentProviderSwitcher`. It took a user, and returned whether they should use the old payments engine or the new. The majority of the time it was as simple as whether the user was in Australia or the UK.
 
 We identified 46 points in our code to stick these conditional switch statements. Everything around those statements would stay. Anything inside would be rewritten. Simple as that.
 
 With this done, the project became a lot less daunting. We had a finite list of features to implement and code to write. All we had to do was figure out how to do them.
 
+<br />
 ## **Planning our architecture**
 
 Before we talk about Stripe’s architecture, let’s briefly talk about our own needs.
@@ -90,11 +92,12 @@ When a poster assigns a tasker, we escrow the money agreed to for that task and 
 
 Most of Stripe’s clients do not have bespoke needs. Their goal is to accept money from their customers and transfer it to themselves. They might be an e-commerce business needing a [checkout cart](https://stripe.com/checkout) or a subscription service needing [recurring billing](https://stripe.com/docs/billing/quickstart). Something more complex like a marketplace, that needs to accept money and pay out to multiple parties, is catered for by [Stripe Connect](https://stripe.com/docs/connect).
 
-![Stripe Connect. Source: [https://stripe.com/docs/connect](https://stripe.com/docs/connect)](https://cdn-images-1.medium.com/max/3600/1*oIHty9n6BMqO8fSwluUI5A.png)*Stripe Connect. Source: [https://stripe.com/docs/connect](https://stripe.com/docs/connect)*
+![Stripe Connect. Source: https://stripe.com/docs/connect](/assets/stripe-connect.png){:width="100%"}
+*Stripe Connect. Source: [https://stripe.com/docs/connect](https://stripe.com/docs/connect)*
 
 The high-level architecture of Stripe Connect is essentially a directed graph flowing from payer to recipient — a structure very familiar to software engineers. In the middle is a big fat node called the **platform account**, which all money is routed through.
 
-The platform account represents the account of the business itself — in this case, Airtasker. Money flows in and out of the platform account in two atomic actions. The customer’s money is taken from their card into the platform account in a **charge. **It is then broken up and moved into **connected accounts* ***using*** *transfers*.***
+The platform account represents the account of the business itself — in this case, Airtasker. Money flows in and out of the platform account in two atomic actions. The customer’s money is taken from their card into the platform account in a **charge**. It is then broken up and moved into **connected accounts** using **transfers**.
 
 Connected accounts are at the heart of Stripe Connect. They represent each of the parties you wish to pay out to. Say, as a hypothetical example, you had a business drop-shipping bouquets of flowers. A customer pays you $50 for a bunch of white lilies, which is charged into your platform account. You then transfer $30 to the wholesaler’s connect account for the flowers, $15 to the shipping company’s connect account and then leave $5 in the platform account as your take.
 
@@ -122,7 +125,7 @@ His card is then charged and the funds, minus the $10 dollars from the coupon, m
 
 ### Plan A
 
-![Our first plan.](https://cdn-images-1.medium.com/max/6000/1*TKPMElqRxcTDfqDmGsQczw.png)*Our first plan.*
+![Our first plan.](/assets/plan-a.png){:width="100%"}*Our first plan.*
 
 Our first plan was to keep the escrowed money in our platform account. When Sara cuts down the tree and Richard releases the funds, we would do the following:
 
@@ -138,7 +141,7 @@ Unfortunately, we quickly learned that escrow has a precise legal definition for
 
 ### **Plan B**
 
-![Our final plan.](https://cdn-images-1.medium.com/max/6000/1*VaWQLY2SL63O3v76mf5p3w.png)*Our final plan.*
+![Our final plan.](/assets/plan-b.png){:width="100%"}*Our final plan.*
 
 To meet legal requirements, the money held secure in Airtasker Pay had to be kept in the tasker’s connected account. This had a few consequences in terms of the complexity.
 
@@ -156,6 +159,7 @@ For Richard, this meant:
 
 Plan B was ultimately more complicated, but it’s what we went with. You can’t argue the law on the basis of technical hardship.
 
+<br />
 ## **Developing our payments engine**
 
 We’d figured out the 46 parts of our codebase we had to rewrite and the internal Stripe transactions that would make our system work. Now we had to go and actually build it.
@@ -176,19 +180,19 @@ However, the decision to go against microservices was no excuse to repeat the mi
 
 Fortunately, a microservice architecture is not a necessary condition for decoupling a codebase — it just conveniently forces you to. There was no reason we couldn’t encapsulate the logic of our payments engine as far from our codebase as possible without intending to make it a service. Encapsulation is essential for good design regardless of the choice of a microservice architecture. Plus, if we ever did want to go down that route? It’s as simple as pulling it out.
 
-And that’s what we did. We created an **engine **—a self-contained section of our Rails repo that shared the same database, but was written with absolutely no context of the rest of the codebase. The engine would have a bunch of payments-related Rails models, like Payment, StripeAccount, PaymentMethod and so forth, which we would try as hard as possible to use purely within the engine. Models from the rest of the codebase, like User or Task, were unwelcome within the engine.
+And that’s what we did. We created an **engine** — a self-contained section of our Rails repo that shared the same database, but was written with absolutely no context of the rest of the codebase. The engine would have a bunch of payments-related Rails models, like `Payment`, `StripeAccount`, `PaymentMethod` and so forth, which we would try as hard as possible to use purely within the engine. Models from the rest of the codebase, like `User` or `Task`, were unwelcome within the engine.
 
 Code that dealt directly with the Airtasker flow, like escrowing a task, went in the main codebase, where it would call the payments engine as a service. The engine itself was nothing more complicated than an interface over atomic Stripe actions — charging, transferring, refunding, adding credit cards and bank accounts, and so forth.
 
 **Non-polymorphic providers**
 
-We started off [part 1](http://link) of this series by saying we never anticipated moving away from our old payment provider. And we’ve all been in enough relationships to know you may start off by thinking ‘this time I’ve found the one’, but there’s a good chance two years later you’ll wake up and look at them and wonder what you even saw in them in the first place.
+We started off [part 1]({% post_url 2018-11-13-tale-two-payment-providers-part-1 %}) of this series by saying we never anticipated moving away from our old payment provider. And we’ve all been in enough relationships to know you may start off by thinking ‘this time I’ve found the one’, but there’s a good chance two years later you’ll wake up and look at them and wonder what you even saw in them in the first place.
 
 Post-implementation, we’re certain Stripe really is the one. We’re deeply in love, getting engaged and there’s probably kids on the horizon.
 
-Pre-implementation, there was an open-ended question of whether we should generalise over the concept of a provider in our codebase. In fact, there’s still remnants of this line of thinking in our engine— we have a model called Provider, from which StripeProvider is the sole inheritor.
+Pre-implementation, there was an open-ended question of whether we should generalise over the concept of a provider in our codebase. In fact, there’s still remnants of this line of thinking in our engine— we have a model called `Provider`, from which `StripeProvider` is the sole inheritor.
 
-This desire came from a technical side rather than the business — engineers love to generalise. We can sit and dream about an alternative reality where, years ago with our first provider, we had engineered this brilliant interface called Provider, which stubbed a few abstract methods like charge_card and payout_money that were core to the payments workflow. Then, moving to Stripe would have been as simple as creating a subclass called StripeProvider to join the OldProvider and implementing those core methods.
+This desire came from a technical side rather than the business — engineers love to generalise. We can sit and dream about an alternative reality where, years ago with our first provider, we had engineered this brilliant interface called `Provider`, which stubbed a few abstract methods like `charge_card` and `payout_money` that were core to the payments workflow. Then, moving to Stripe would have been as simple as creating a subclass called `StripeProvider` to join the `OldProvider` and implementing those core methods.
 
 This is a fever dream. Trying to orchestrate it was a wild goose chase and a classic example of over-engineering that we quickly abandoned. Payment providers have internal architectures and APIs that are wildly different — trying to fit a layer of abstraction over a singular payment provider was going to couple that abstraction layer to the provider without fail, making it redundant if we ever actually tried to add a new one. It would also add excruciating structure to an already complicated implementation.
 
@@ -196,10 +200,11 @@ Trying to create unnecessary layers of abstraction is the cliché example of ove
 
 The result of this is that the structure of our payments engine is tightly coupled to our Stripe implementation. If you want to change it, you’ve got to write more code. Get over it.
 
+<br />
 ## **Launch**
 
 Come late February, it was time to roll out in London. At this point the Stripe implementation was functional, yet far from feature parity with Australia. Refunds were being handled manually by support agents in the support dashboard, we didn’t have payment history or receipts, and our plan B for our account infrastructure was still work in progress.
 
 We pressed deploy with bated breath. As anyone producing software will tell you, you can architect and test something to death, but you won’t truly know if it works until it’s out in the wild.
 
-It was successful. More than successful, in fact — we’d thoroughly proven our MVP and were willing to commit more resources to bringing Stripe into Australia, as we will discuss in [Part 3](https://medium.com/@tpagram/stripe-down-under-9fe3ca7aa8ee) of our series
+It was successful. More than successful, in fact — we’d thoroughly proven our MVP and were willing to commit more resources to bringing Stripe into Australia, as we will discuss in [Part 3]({% post_url 2018-11-13-tale-two-payment-providers-part-3 %}) of our series

@@ -2,13 +2,13 @@
 layout: post
 title: Stripe Down Under
 subtitle: How we earned our Stripes — Part 3
-description: This is the third article in a series of blog posts about the transition towards Stripe as Airtasker’s main payment provider.
-category: Technology
+description: Third article in a series of blog posts about the migrating to Stripe.
+category: tech
 excerpt_separator: <!--more-->
 comments: true
 ---
 
-![](https://cdn-images-1.medium.com/max/6002/1*MwsHp6v8MCiKdwmQ9xcbww.png){:width="100%"}
+![](/assets/two-payment-providers-header-3.png){:width="100%"}
 
 [*Originally posted on Medium.*](https://medium.com/@tpagram/stripe-down-under-9fe3ca7aa8ee)
 
@@ -29,7 +29,8 @@ In Australia, we go through in excess of 30,000 tasks a week. We’ve got close 
 
 ### Planning iteration
 
-![Could it be this simple?](https://cdn-images-1.medium.com/max/6000/1*3ZIpRIDhoXAvMoNJ6gbjFQ.png)*Could it be this simple?*
+![Could it be this simple?](/assets/simple-plan.png){:width="100%"}
+*Could it be this simple?*
 
 We needed a plan. So we sat down and made one.
 
@@ -55,7 +56,7 @@ There was a silver lining to this logic. If the work to support both types of ta
 
 ### Our graduated migration plan
 
-![](https://cdn-images-1.medium.com/max/6000/1*FVrQ5JjDgpi0VBiLred9Xg.png)
+![A graduated plan.](/assets/graduated-plan.png){:width="100%"}
 
 Our third plan was similar to the second: after a given date, we would introduce Stripe tasks onto the platform and leave existing tasks in the old provider. However, we would also let new tasks be created in the old provider — essentially having both kinds of tasks running concurrently on Airtasker.
 
@@ -63,7 +64,7 @@ The decision point that determined whether a task’s funds would be escrowed on
 
 Firstly, it let us run tasks in both providers without worrying about syncing credit cards between the two. Both providers tokenise cards directly and hand the token to us afterwards. In order to pass it to both providers, we’d have to have the sensitive card information running through our backend — a [PCI](https://en.wikipedia.org/wiki/Payment_Card_Industry_Data_Security_Standard) compliance nightmare.
 
-Secondly, it solved another issue we’d been puzzling over — how to migrate our credit cards without losing any along the way. We’ll speak about this more when we get to [Part 5](https://medium.com/@tpagram/to-our-credit-1cea3c41dfbb), but here’s the gist.
+Secondly, it solved another issue we’d been puzzling over — how to migrate our credit cards without losing any along the way. We’ll speak about this more when we get to [Part 5]({% post_url 2018-11-13-tale-two-payment-providers-part-5 %}), but here’s the gist.
 
 We got our old and new providers talking to each other (awkward), and they graciously agreed to do a token migration. Essentially, the old provider would supply the info for half a million credit cards to Stripe, and Stripe would tokenise each one. Fantastic.
 
@@ -83,4 +84,4 @@ This meant we could finally turn off the bank account sync to our old provider a
 
 Finally, we have Phase 3. One day, months in the future, an unwitting tasker will pack up their equipment, dust off their hands after a job well done and press the request payment button. Their poster, delighted with their handiwork, will release the funds and give a enthused review. And we’ll be standing in front of our computers, champagne in hand, watching their task page progress as these two unintentionally mark the end of an era. The final task in our old provider, and a complete migration to Stripe.
 
-That was the plan, at least. Before we could dream of that, we first had to tackle two glaring problems: syncing our bank accounts, which we’ll address in [Part 4](https://medium.com/@tpagram/putting-our-accounts-in-order-3366d17ce549), and migrating our credit cards, which we’ll close up in [Part 5](https://medium.com/@tpagram/to-our-credit-1cea3c41dfbb).
+That was the plan, at least. Before we could dream of that, we first had to tackle two glaring problems: syncing our bank accounts, which we’ll address in [Part 4]({% post_url 2018-11-13-tale-two-payment-providers-part-4 %}), and migrating our credit cards, which we’ll close up in [Part 5]({% post_url 2018-11-13-tale-two-payment-providers-part-5 %}).

@@ -2,13 +2,13 @@
 layout: post
 title: Putting Our Accounts in Order
 subtitle: How we earned our Stripes — Part 4
-description: This is the fourth article in a series of blog posts about the transition towards Stripe as Airtasker’s main payment provider.
-category: Technology
+description: Fourth article in a series of blog posts about the migrating to Stripe.
+category: tech
 excerpt_separator: <!--more-->
 comments: true
 ---
 
-![](https://cdn-images-1.medium.com/max/6002/1*ikeGJuLrXRqkn7wiq2ChDA.png){:width="100%"}
+![](/assets/two-payment-providers-header-4.png){:width="100%"}
 
 [*Originally posted on Medium.*](https://medium.com/@tpagram/putting-our-accounts-in-order-3366d17ce549)
 
@@ -17,7 +17,7 @@ comments: true
 Despite all the excellent work getting our own system ready to accept Stripe tasks, we had one glaring omission. Our taskers are paid their hard-earned funds into bank accounts, which were stored and tokenised in the ecosystem of our old payment provider. We had about a quarter of a million of these. If we wanted our taskers to continue to get their money, we needed to add these bank accounts to Stripe.
 <!--more-->
 
-What’s more —we had to time this with our [Phase 1 launch](https://medium.com/@tpagram/stripe-down-under-9fe3ca7aa8ee). We obviously needed the bank accounts synced before launch day, but what about the gap between those two events? If any users updated their bank account between the sync and the Stripe launch, we still needed to capture them.
+What’s more —we had to time this with our [Phase 1 launch]({% post_url 2018-11-13-tale-two-payment-providers-part-3 %}). We obviously needed the bank accounts synced before launch day, but what about the gap between those two events? If any users updated their bank account between the sync and the Stripe launch, we still needed to capture them.
 
 Solution? Write a big, gnarly migration script.
 
@@ -93,7 +93,7 @@ If you’re a masochist and you have a pressing desire to feel bad, try rate lim
 
 Unfortunately, it’s what we had to do. After investigating the options, we settled on an existing gem: [Resque Restriction,](https://github.com/flyerhzm/resque-restriction) which was pretty much plug and play. It’s almost a shame, because if we’d chosen to write the migration using threads we would have gotten the opportunity to squander our precious time and resources making an amazing thread rate limiter, which sounds like a lot of a fun. Our PM was grateful though, at least.
 
-On the plus side, the rate limiting gem was pretty nifty. It made us create an additional queue for our workers called the restriction queue, where jobs would be relegated if a worker attempted to pick it up when we’d already gone over our allotted jobs per second. The workers would then come round for a second pass on the restriction queue later. Pretty much like being picked last on a high school sports team. Not that I have any experience with that.
+On the plus side, the rate limiting gem was pretty nifty. It made us create an additional queue for our workers called the `restriction` queue, where jobs would be relegated if a worker attempted to pick it up when we’d already gone over our allotted jobs per second. The workers would then come round for a second pass on the restriction queue later. Pretty much like being picked last on a high school sports team. Not that I have any experience with that.
 
 Once implemented, we settled on a limit of 5 jobs a second, safely under the Stripe limit of 6 a second, and once more tried our incremental sample size test.
 
@@ -135,4 +135,4 @@ It’s easy to imagine a world in which we didn’t do these two things. Where t
 
 It’s only experience that allows you to think: well, this is beautiful code. Probably won’t work anyway.
 
-Follow us to [Part 5](https://medium.com/@tpagram/to-our-credit-1cea3c41dfbb), where we tackle the final piece of the puzzle by migrating half-a-million credit cards.
+Follow us to [Part 5]({% post_url 2018-11-13-tale-two-payment-providers-part-5 %}), where we tackle the final piece of the puzzle by migrating half-a-million credit cards.

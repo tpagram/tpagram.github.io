@@ -19,3 +19,13 @@
   margin-bottom: 0;
   font-size: 14px;
 }
+
+.post-subtitle {
+  margin-top: 0px;
+}
+
+img + em {
+  display: block;
+  text-align: center;
+  font-size: 14px;
+}

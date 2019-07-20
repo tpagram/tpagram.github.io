@@ -2,7 +2,7 @@
 layout: post
 title: How to set up SFTP with a jailed user on an AWS EC2 instance
 description: A complete guide to setting up SFTP securely on an AWS EC2 instance.
-category: Technology
+category: tech
 excerpt_separator: <!--more-->
 comments: true
 ---
