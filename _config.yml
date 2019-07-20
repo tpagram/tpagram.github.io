@@ -40,5 +40,6 @@ paginate_path: "page:num"
 plugins:
   - jekyll-seo-tag
   - jekyll-paginate
+  - jekyll-sitemap
 
 permalink: /posts/:categories/:title
